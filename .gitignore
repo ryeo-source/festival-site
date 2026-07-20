@@ -1,2 +1,11 @@
 .agents/
 skills-lock.json
+
+# dependencies
+node_modules/
+
+# secrets
+.env
+.env.*
+!.env.example
+
