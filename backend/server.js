@@ -192,6 +192,43 @@ app.post("/api/guestbook", async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+app.put("/api/guestbook/:id", async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const author_name = (req.body?.author_name || "").toString().trim();
+    const message = (req.body?.message || "").toString().trim();
+    if (!author_name || !message) {
+      return res.status(400).json({ error: "author_name과 message는 필수입니다." });
+    }
+    if (author_name.length > 50 || message.length > 1000) {
+      return res.status(400).json({ error: "작성자 50자, 메시지 1000자 이내여야 합니다." });
+    }
+    const { data, error } = await supabase
+      .from("guestbook")
+      .update({ author_name, message })
+      .eq("id", id)
+      .eq("is_public", true)
+      .select("id,author_name,message,created_at")
+      .single();
+    if (error) throw error;
+    if (!data) return res.status(404).json({ error: "방명록 항목을 찾을 수 없습니다." });
+    res.json(data);
+  } catch (e) { next(e); }
+});
+
+app.delete("/api/guestbook/:id", async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const { error } = await supabase
+      .from("guestbook")
+      .delete()
+      .eq("id", id)
+      .eq("is_public", true);
+    if (error) throw error;
+    res.json({ success: true, id });
+  } catch (e) { next(e); }
+});
+
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({ error: "Internal server error", message: err.message });
