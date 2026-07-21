@@ -443,6 +443,42 @@
       margin-top: 2px;
     }
 
+    /* Guestbook modal */
+    .gb-overlay {
+      position: fixed; inset: 0; z-index: 50;
+      background: rgba(20, 20, 19, 0.55);
+      display: none;
+      align-items: center; justify-content: center;
+      padding: 24px;
+    }
+    .gb-overlay.open { display: flex; }
+    .gb-modal {
+      background: var(--canvas);
+      color: var(--ink);
+      border-radius: var(--r-xl);
+      width: 100%; max-width: 560px;
+      max-height: 85vh; overflow: auto;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    .gb-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .gb-head h3 { font-family: var(--serif); font-weight: 600; font-size: 28px; letter-spacing: -0.01em; }
+    .gb-close { background: none; border: none; font-size: 26px; line-height: 1; color: var(--muted); cursor: pointer; }
+    .gb-close:active { color: var(--ink); }
+    .gb-form { display: grid; gap: 10px; margin-bottom: 22px; }
+    .gb-form input, .gb-form textarea {
+      width: 100%; font-family: var(--sans); font-size: 14px;
+      background: #fff; color: var(--ink); border: 1px solid var(--hairline);
+      border-radius: var(--r-md); padding: 10px 14px;
+    }
+    .gb-form textarea { min-height: 72px; resize: vertical; }
+    .gb-list { display: grid; gap: 12px; }
+    .gb-item { background: var(--surface-card); border-radius: var(--r-lg); padding: 16px 18px; }
+    .gb-item .gb-name { font-weight: 600; font-size: 15px; color: var(--ink); }
+    .gb-item .gb-msg { font-size: 14px; color: var(--body); margin-top: 4px; white-space: pre-wrap; }
+    .gb-item .gb-time { font-size: 12px; color: var(--muted-soft); margin-top: 6px; letter-spacing: 0.5px; }
+    .gb-status { font-size: 13px; color: var(--muted); min-height: 18px; margin-bottom: 4px; }
+
     /* Responsive */
     @media (max-width: 900px) {
       .hero { padding: 64px 24px; }
@@ -477,7 +513,7 @@
         <li><a href="#">오시는 길</a></li>
         <li><a href="#">티켓</a></li>
       </ul>
-      <a class="btn btn-primary" href="#">방명록</a>
+      <a class="btn btn-primary" href="#" id="gbOpen">방명록</a>
     </div>
   </header>
 
@@ -614,6 +650,23 @@
     <div class="d-num">D-3</div>
   </div>
 
+  <!-- Guestbook modal -->
+  <div class="gb-overlay" id="gbOverlay" aria-hidden="true">
+    <div class="gb-modal" role="dialog" aria-modal="true" aria-label="방명록">
+      <div class="gb-head">
+        <h3>방명록</h3>
+        <button class="gb-close" id="gbClose" aria-label="닫기">&times;</button>
+      </div>
+      <form class="gb-form" id="gbForm">
+        <input type="text" id="gbName" placeholder="이름" maxlength="50" required>
+        <textarea id="gbMsg" placeholder="메시지를 남겨주세요" maxlength="1000" required></textarea>
+        <button class="btn btn-primary" type="submit">남기기</button>
+      </form>
+      <div class="gb-status" id="gbStatus"></div>
+      <div class="gb-list" id="gbList"></div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     (function () {
@@ -665,6 +718,90 @@
       });
 
       loadClickCounts();
+    })();
+  </script>
+  <script>
+    (function () {
+      const API = "https://autumn-light-festival-api.onrender.com";
+      const overlay = document.getElementById("gbOverlay");
+      const openBtn = document.getElementById("gbOpen");
+      const closeBtn = document.getElementById("gbClose");
+      const list = document.getElementById("gbList");
+      const status = document.getElementById("gbStatus");
+      const form = document.getElementById("gbForm");
+      const nameEl = document.getElementById("gbName");
+      const msgEl = document.getElementById("gbMsg");
+
+      function fmtTime(iso) {
+        try {
+          const d = new Date(iso);
+          const p = (n) => String(n).padStart(2, "0");
+          return d.getFullYear() + "." + p(d.getMonth() + 1) + "." + p(d.getDate()) + " " + p(d.getHours()) + ":" + p(d.getMinutes());
+        } catch { return iso; }
+      }
+
+      async function loadGuestbook() {
+        status.textContent = "불러오는 중...";
+        list.innerHTML = "";
+        try {
+          const res = await fetch(API + "/api/guestbook");
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          const data = await res.json();
+          status.textContent = "";
+          if (!data.length) { status.textContent = "아직 글이 없습니다. 첫 글을 남겨보세요!"; return; }
+          data.forEach((g) => {
+            const item = document.createElement("div");
+            item.className = "gb-item";
+            const n = document.createElement("div"); n.className = "gb-name"; n.textContent = g.author_name;
+            const m = document.createElement("div"); m.className = "gb-msg"; m.textContent = g.message;
+            const t = document.createElement("div"); t.className = "gb-time"; t.textContent = fmtTime(g.created_at);
+            item.append(n, m, t);
+            list.appendChild(item);
+          });
+        } catch (e) {
+          status.textContent = "불러오기 실패: " + e.message;
+        }
+      }
+
+      function openModal() {
+        overlay.classList.add("open");
+        overlay.setAttribute("aria-hidden", "false");
+        loadGuestbook();
+      }
+      function closeModal() {
+        overlay.classList.remove("open");
+        overlay.setAttribute("aria-hidden", "true");
+      }
+
+      openBtn.addEventListener("click", function (e) { e.preventDefault(); openModal(); });
+      closeBtn.addEventListener("click", closeModal);
+      overlay.addEventListener("click", function (e) { if (e.target === overlay) closeModal(); });
+      document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeModal(); });
+
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const author_name = nameEl.value.trim();
+        const message = msgEl.value.trim();
+        if (!author_name || !message) return;
+        status.textContent = "전송 중...";
+        try {
+          const res = await fetch(API + "/api/guestbook", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ author_name, message })
+          });
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            status.textContent = "실패: " + (err.error || res.status);
+            return;
+          }
+          msgEl.value = "";
+          status.textContent = "등록되었습니다!";
+          loadGuestbook();
+        } catch (e) {
+          status.textContent = "전송 실패: " + e.message;
+        }
+      });
     })();
   </script>
 </body>
