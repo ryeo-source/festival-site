@@ -120,6 +120,31 @@
       font-weight: 500;
     }
 
+    .nav-actions { display: flex; align-items: center; gap: var(--sp-2); }
+    .nav-toggle {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
+      width: 40px; height: 40px;
+      padding: 0 9px;
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--r-md);
+      cursor: pointer;
+    }
+    .nav-toggle span {
+      display: block;
+      height: 2px;
+      width: 100%;
+      background: var(--ink);
+      border-radius: 2px;
+      transition: transform 0.2s, opacity 0.2s;
+    }
+    .nav-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    .nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+    .nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
     /* Buttons */
     .btn {
       display: inline-flex;
@@ -525,22 +550,59 @@
 
     /* Responsive */
     @media (max-width: 900px) {
-      .hero { padding: 64px 24px; }
-      .hero-inner { grid-template-columns: 1fr; gap: 40px; }
-      .hero h1 { font-size: 44px; }
-      .section { padding: 64px 24px; }
-      .section-head h2 { font-size: 36px; }
-      .cards { grid-template-columns: 1fr; }
-      .cta-inner { padding: 40px 24px; }
-      .cta-inner h2 { font-size: 28px; }
-      .menu { display: none; }
+      .hero { padding: 56px 22px; }
+      .hero-inner { grid-template-columns: 1fr; gap: 36px; }
+      .hero h1 { font-size: 42px; }
+      .section { padding: 56px 22px; }
+      .section-head h2 { font-size: 34px; }
+      .cards { grid-template-columns: 1fr; gap: var(--sp-4); }
+      .cta-inner { padding: 40px 22px; }
+      .cta-inner h2 { font-size: 26px; }
       .footer-cols { grid-template-columns: 1fr 1fr; }
       .gb-grid { grid-template-columns: 1fr; }
       .gb-form-card { position: static; top: auto; }
+
+      .nav-toggle { display: flex; }
+      .menu {
+        position: absolute;
+        top: 64px; left: 0; right: 0;
+        flex-direction: column;
+        gap: 0;
+        background: var(--canvas);
+        border-bottom: 1px solid var(--hairline);
+        padding: var(--sp-2) var(--sp-5);
+        box-shadow: 0 8px 24px rgba(20, 20, 19, 0.08);
+        display: none;
+      }
+      .menu.open { display: flex; }
+      .menu li { width: 100%; }
+      .menu a { display: block; padding: var(--sp-3) 0; border-bottom: 1px solid var(--hairline-soft); }
+      .menu li:last-child a { border-bottom: none; }
     }
-    @media (max-width: 520px) {
+
+    @media (max-width: 560px) {
+      .nav-inner { padding: 0 16px; }
+      .hero { padding: 44px 18px; }
+      .hero h1 { font-size: 34px; letter-spacing: -0.02em; }
+      .hero .lead { font-size: 16px; }
+      .hero-actions { flex-direction: column; align-items: stretch; }
+      .hero-actions .btn { width: 100%; }
+      .hero-card { padding: var(--sp-5); }
+      .pass-date { font-size: 30px; }
+      .section { padding: 48px 18px; }
+      .section-head { margin-bottom: 36px; }
+      .section-head h2 { font-size: 28px; }
+      .feature-card { padding: var(--sp-5); }
+      .cta-inner { padding: 32px 18px; }
+      .cta-inner h2 { font-size: 22px; }
       .footer-cols { grid-template-columns: 1fr; }
-      .d-card { left: 16px; bottom: 16px; padding: 12px 14px; }
+      .footer-bottom { font-size: 12px; }
+      .gb-form-card { padding: var(--sp-5); }
+      .gb-item { padding: var(--sp-4); }
+      .gb-actions button { padding: var(--sp-3) var(--sp-4); }
+      .d-card { left: 14px; bottom: 14px; padding: 10px 12px; }
+      .d-card .d-num { font-size: 18px; }
+      .d-card .d-label { font-size: 10px; }
     }
   </style>
 </head>
@@ -559,7 +621,12 @@
         <li><a href="#">오시는 길</a></li>
         <li><a href="#">티켓</a></li>
       </ul>
-      <a class="btn btn-primary" href="#" id="gbOpen">방명록</a>
+      <div class="nav-actions">
+        <a class="btn btn-primary" href="#" id="gbOpen">방명록</a>
+        <button class="nav-toggle" id="navToggle" aria-label="메뉴 열기" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -722,6 +789,23 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script>
+    (function () {
+      var t = document.getElementById("navToggle");
+      var m = document.querySelector(".menu");
+      if (!t || !m) return;
+      t.addEventListener("click", function () {
+        var open = m.classList.toggle("open");
+        t.setAttribute("aria-expanded", open ? "true" : "false");
+      });
+      m.addEventListener("click", function (e) {
+        if (e.target.closest("a")) {
+          m.classList.remove("open");
+          t.setAttribute("aria-expanded", "false");
+        }
+      });
+    })();
+  </script>
   <script>
     (function () {
       const SUPA_URL = "https://iklbohccsveijkdmoiec.supabase.co";
