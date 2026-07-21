@@ -10,29 +10,29 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
   <style>
     :root {
-      --primary: #d4944a;
-      --primary-hover: #e8a55a;
-      --primary-active: #b87a35;
-      --gold: #e8a55a;
+      --primary: #c8842d;
+      --primary-hover: #d4944a;
+      --primary-active: #a96e20;
+      --gold: #d4944a;
+      --gold-bright: #e8a55a;
       --gold-soft: #f0c98a;
-      --amber: #d4a017;
-      --ink: #0e0d0b;
-      --ink-soft: #1a1815;
-      --body: #a09a8e;
-      --body-strong: #d6d0c4;
-      --muted: #6e6a60;
-      --muted-soft: #4a463e;
-      --hairline: rgba(212, 148, 74, 0.15);
-      --hairline-soft: rgba(255, 255, 255, 0.06);
-      --canvas: #0e0d0b;
-      --canvas-warm: #141210;
-      --surface-card: #1a1714;
-      --surface-card-hover: #211e19;
-      --surface-dark: #0e0d0b;
-      --surface-elevated: #1e1b17;
-      --on-primary: #0e0d0b;
-      --on-dark: #f5f0e8;
-      --on-dark-soft: #7a756a;
+      --amber: #c27a28;
+      --ink: #2a2520;
+      --ink-soft: #3d362e;
+      --body: #6b6359;
+      --body-strong: #4a433a;
+      --muted: #9e9589;
+      --muted-soft: #b8b0a4;
+      --hairline: rgba(200, 132, 45, 0.18);
+      --hairline-soft: rgba(200, 132, 45, 0.1);
+      --canvas: #faf6ef;
+      --canvas-warm: #f7f1e6;
+      --surface-card: #f3ece0;
+      --surface-card-hover: #ede4d5;
+      --surface-soft: #efe8da;
+      --on-primary: #ffffff;
+      --on-dark: #faf6ef;
+      --on-dark-soft: #6b6359;
       --error: #c64545;
       --success: #5db872;
 
@@ -76,13 +76,37 @@
       color: currentColor;
     }
 
+    /* ─── Scroll reveal ─── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+
+    /* ─── Ambient light particles ─── */
+    #ambientCanvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
     /* ─── Top nav ─── */
     .top-nav {
       position: sticky;
       top: 0;
       z-index: 10;
-      background: rgba(14, 13, 11, 0.85);
-      backdrop-filter: blur(16px) saturate(1.4);
+      background: rgba(250, 246, 239, 0.88);
+      backdrop-filter: blur(14px) saturate(1.3);
       border-bottom: 1px solid var(--hairline-soft);
       height: 64px;
       display: flex;
@@ -104,7 +128,7 @@
       font-family: var(--serif);
       font-weight: 600;
       font-size: 22px;
-      color: var(--on-dark);
+      color: var(--ink);
       letter-spacing: -0.01em;
       text-decoration: none;
     }
@@ -116,13 +140,25 @@
       list-style: none;
     }
     .menu a {
-      color: var(--on-dark-soft);
+      color: var(--ink-soft);
       text-decoration: none;
       font-size: 14px;
       font-weight: 500;
       transition: color 0.2s;
+      position: relative;
     }
-    .menu a:hover { color: var(--on-dark); }
+    .menu a::after {
+      content: "";
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 1.5px;
+      background: var(--gold);
+      transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .menu a:hover { color: var(--ink); }
+    .menu a:hover::after { width: 100%; }
 
     .nav-actions { display: flex; align-items: center; gap: var(--sp-2); }
     .nav-toggle {
@@ -132,7 +168,7 @@
       gap: 4px;
       width: 40px; height: 40px;
       padding: 0 9px;
-      background: transparent;
+      background: var(--canvas);
       border: 1px solid var(--hairline);
       border-radius: var(--r-md);
       cursor: pointer;
@@ -141,7 +177,7 @@
       display: block;
       height: 2px;
       width: 100%;
-      background: var(--on-dark);
+      background: var(--ink);
       border-radius: 2px;
       transition: transform 0.2s, opacity 0.2s;
     }
@@ -165,62 +201,55 @@
       text-decoration: none;
       border: 1px solid transparent;
       cursor: pointer;
-      transition: all 0.25s ease;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .btn-primary {
       background: var(--gold);
-      color: var(--ink);
-      box-shadow: 0 0 20px rgba(232, 165, 90, 0.25);
+      color: var(--on-primary);
+      box-shadow: 0 2px 12px rgba(212, 148, 74, 0.3);
     }
     .btn-primary:hover {
-      background: var(--gold-soft);
-      box-shadow: 0 0 30px rgba(232, 165, 90, 0.4);
+      background: var(--gold-bright);
+      box-shadow: 0 4px 20px rgba(212, 148, 74, 0.4);
       transform: translateY(-1px);
     }
     .btn-primary:active { background: var(--primary-active); transform: translateY(0); }
     .btn-secondary {
-      background: transparent;
-      color: var(--on-dark);
-      border-color: rgba(255, 255, 255, 0.15);
+      background: var(--canvas);
+      color: var(--ink);
+      border-color: var(--hairline);
     }
     .btn-secondary:hover {
-      border-color: rgba(255, 255, 255, 0.3);
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--surface-soft);
+      border-color: var(--gold-soft);
     }
-    .btn-secondary:active { background: rgba(255, 255, 255, 0.08); }
+    .btn-secondary:active { background: var(--surface-card); }
 
     /* ─── Hero ─── */
     .hero {
       position: relative;
-      background: var(--canvas);
-      padding: 120px 24px 140px;
+      padding: 100px 24px 120px;
       overflow: hidden;
+      background:
+        radial-gradient(ellipse 70% 60% at 75% 20%, rgba(232, 165, 90, 0.18) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 50% at 20% 80%, rgba(200, 132, 45, 0.08) 0%, transparent 60%),
+        var(--canvas);
     }
     .hero::before {
       content: "";
       position: absolute;
-      top: -40%;
-      right: -20%;
-      width: 800px;
-      height: 800px;
-      background: radial-gradient(circle, rgba(232, 165, 90, 0.12) 0%, rgba(212, 160, 23, 0.06) 40%, transparent 70%);
+      top: -100px;
+      right: -60px;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(232, 165, 90, 0.2) 0%, rgba(200, 132, 45, 0.06) 50%, transparent 70%);
+      border-radius: 50%;
       pointer-events: none;
-      animation: glowPulse 6s ease-in-out infinite;
+      animation: heroGlow 5s ease-in-out infinite;
     }
-    .hero::after {
-      content: "";
-      position: absolute;
-      bottom: -30%;
-      left: -10%;
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, rgba(212, 148, 74, 0.08) 0%, transparent 60%);
-      pointer-events: none;
-      animation: glowPulse 8s ease-in-out infinite reverse;
-    }
-    @keyframes glowPulse {
-      0%, 100% { opacity: 0.6; transform: scale(1); }
-      50% { opacity: 1; transform: scale(1.08); }
+    @keyframes heroGlow {
+      0%, 100% { opacity: 0.7; transform: scale(1) translate(0, 0); }
+      50% { opacity: 1; transform: scale(1.1) translate(-10px, 10px); }
     }
 
     .hero-inner {
@@ -231,7 +260,7 @@
       gap: 64px;
       align-items: center;
       position: relative;
-      z-index: 1;
+      z-index: 2;
     }
 
     .eyebrow {
@@ -248,18 +277,31 @@
     .eyebrow::before {
       content: "";
       width: 32px;
-      height: 1px;
-      background: linear-gradient(90deg, var(--gold), transparent);
+      height: 1.5px;
+      background: linear-gradient(90deg, var(--gold), var(--gold-soft));
     }
 
     .hero h1 {
       font-family: var(--serif);
       font-weight: 700;
-      font-size: 80px;
+      font-size: 76px;
       line-height: 0.95;
       letter-spacing: -0.03em;
-      color: var(--on-dark);
+      color: var(--ink);
       margin-bottom: 24px;
+      position: relative;
+    }
+    .hero h1 .light-word {
+      background: linear-gradient(135deg, var(--amber) 0%, var(--gold-bright) 50%, var(--gold-soft) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 4s ease-in-out infinite;
+      background-size: 200% 100%;
+    }
+    @keyframes shimmer {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
     }
 
     .hero .lead {
@@ -281,31 +323,29 @@
       flex-wrap: wrap;
     }
 
-    /* Hero dark pass card */
+    /* Hero pass card */
     .hero-card {
-      background: linear-gradient(135deg, #1a1714 0%, #0e0d0b 100%);
-      color: var(--on-dark);
+      background: linear-gradient(145deg, #fffcf7 0%, #f7f0e2 100%);
+      color: var(--ink);
       border-radius: var(--r-xl);
       padding: 36px;
       position: relative;
-      border: 1px solid rgba(232, 165, 90, 0.1);
-      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--hairline);
+      box-shadow:
+        0 4px 24px rgba(200, 132, 45, 0.1),
+        0 1px 3px rgba(0, 0, 0, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      animation: cardFloat 6s ease-in-out infinite;
     }
-    .hero-card::before {
-      content: "";
-      position: absolute;
-      top: -1px;
-      left: 24px;
-      right: 24px;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--gold-soft), transparent);
-      opacity: 0.4;
+    @keyframes cardFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
     }
     .badge-coral {
       display: inline-flex;
       align-items: center;
-      background: rgba(232, 165, 90, 0.15);
-      color: var(--gold);
+      background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+      color: var(--on-primary);
       font-size: 11px;
       font-weight: 600;
       letter-spacing: 1.5px;
@@ -313,14 +353,14 @@
       padding: 6px 14px;
       border-radius: var(--r-pill);
       margin-bottom: 28px;
-      border: 1px solid rgba(232, 165, 90, 0.2);
+      box-shadow: 0 2px 8px rgba(212, 148, 74, 0.3);
     }
     .pass-label {
       font-size: 11px;
       font-weight: 600;
       letter-spacing: 2px;
       text-transform: uppercase;
-      color: var(--on-dark-soft);
+      color: var(--muted);
       margin-bottom: 8px;
     }
     .pass-date {
@@ -329,17 +369,17 @@
       font-size: 44px;
       line-height: 1.1;
       letter-spacing: -0.02em;
-      color: var(--on-dark);
+      color: var(--ink);
       margin-bottom: 6px;
     }
     .pass-loc {
       font-size: 14px;
-      color: var(--on-dark-soft);
+      color: var(--muted);
       margin-bottom: 28px;
     }
     .pass-rule {
       height: 1px;
-      background: rgba(255, 255, 255, 0.08);
+      background: linear-gradient(90deg, var(--hairline), var(--gold-soft), var(--hairline));
       margin-bottom: 16px;
     }
     .pass-row {
@@ -349,14 +389,17 @@
       font-size: 14px;
       padding: 10px 0;
     }
-    .pass-row span:first-child { color: var(--on-dark-soft); }
-    .pass-row span:last-child { color: var(--on-dark); font-weight: 500; }
+    .pass-row span:first-child { color: var(--muted); }
+    .pass-row span:last-child { color: var(--ink); font-weight: 500; }
 
     /* ─── Section ─── */
     .section {
       padding: 120px 24px;
-      background: var(--canvas);
       position: relative;
+      z-index: 2;
+    }
+    .section-alt {
+      background: var(--canvas-warm);
     }
     .section-inner {
       max-width: var(--maxw);
@@ -372,7 +415,7 @@
       font-size: 52px;
       line-height: 1.05;
       letter-spacing: -0.02em;
-      color: var(--on-dark);
+      color: var(--ink);
       margin-bottom: 12px;
     }
     .section-head p {
@@ -391,7 +434,7 @@
       border-radius: var(--r-lg);
       padding: 36px;
       border: 1px solid var(--hairline-soft);
-      transition: all 0.3s ease;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
       overflow: hidden;
     }
@@ -401,16 +444,16 @@
       top: 0;
       left: 0;
       right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(232, 165, 90, 0.3), transparent);
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold-soft), transparent);
       opacity: 0;
       transition: opacity 0.3s ease;
     }
     .feature-card:hover {
       background: var(--surface-card-hover);
-      border-color: rgba(232, 165, 90, 0.15);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-      transform: translateY(-2px);
+      border-color: rgba(200, 132, 45, 0.2);
+      box-shadow: 0 8px 32px rgba(200, 132, 45, 0.1);
+      transform: translateY(-3px);
     }
     .feature-card:hover::before { opacity: 1; }
 
@@ -419,8 +462,9 @@
       width: 20px;
       height: 20px;
       margin-bottom: 20px;
-      opacity: 0.7;
+      transition: transform 0.3s ease;
     }
+    .feature-card:hover .mark { transform: rotate(15deg) scale(1.1); }
     .feature-card .tag {
       font-size: 11px;
       font-weight: 600;
@@ -433,7 +477,7 @@
       font-family: var(--serif);
       font-weight: 600;
       font-size: 24px;
-      color: var(--on-dark);
+      color: var(--ink);
       margin-bottom: 12px;
       letter-spacing: -0.01em;
     }
@@ -444,13 +488,16 @@
       line-height: 1.7;
     }
     .text-link {
-      color: var(--gold);
+      color: var(--amber);
       text-decoration: none;
       font-size: 14px;
       font-weight: 500;
-      transition: color 0.2s;
+      transition: color 0.2s, gap 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
-    .text-link:hover { color: var(--gold-soft); }
+    .text-link:hover { color: var(--gold); gap: 8px; }
     .card-foot {
       display: flex;
       align-items: center;
@@ -465,35 +512,45 @@
       font-weight: 500;
       letter-spacing: 1.5px;
       text-transform: uppercase;
-      color: var(--muted);
+      color: var(--muted-soft);
     }
 
     /* ─── CTA band ─── */
     .cta-wrap {
       padding: 0 24px 120px;
+      position: relative;
+      z-index: 2;
     }
     .cta-inner {
       max-width: var(--maxw);
       margin: 0 auto;
-      background: linear-gradient(135deg, #1a1714 0%, #0e0d0b 100%);
-      color: var(--on-dark);
+      background:
+        radial-gradient(ellipse 60% 80% at 30% 50%, rgba(232, 165, 90, 0.15) 0%, transparent 60%),
+        linear-gradient(135deg, #f7f0e2 0%, #f3ece0 100%);
+      color: var(--ink);
       border-radius: var(--r-xl);
       padding: 80px 64px;
       text-align: center;
-      border: 1px solid rgba(232, 165, 90, 0.12);
+      border: 1px solid var(--hairline);
       position: relative;
       overflow: hidden;
+      box-shadow: 0 4px 24px rgba(200, 132, 45, 0.08);
     }
     .cta-inner::before {
       content: "";
       position: absolute;
-      top: -50%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, rgba(232, 165, 90, 0.1) 0%, transparent 60%);
+      top: -60px;
+      right: -40px;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(232, 165, 90, 0.2) 0%, transparent 70%);
+      border-radius: 50%;
       pointer-events: none;
+      animation: ctaGlow 4s ease-in-out infinite;
+    }
+    @keyframes ctaGlow {
+      0%, 100% { opacity: 0.5; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.2); }
     }
     .cta-inner h2 {
       font-family: var(--serif);
@@ -510,13 +567,15 @@
       margin-bottom: 32px;
       position: relative;
     }
+    .cta-inner .btn { position: relative; }
 
     /* ─── Footer ─── */
     footer {
-      background: var(--surface-dark);
+      background: var(--ink);
       color: var(--on-dark-soft);
       padding: 72px 24px 40px;
-      border-top: 1px solid var(--hairline-soft);
+      position: relative;
+      z-index: 2;
     }
     .footer-inner {
       max-width: var(--maxw);
@@ -541,7 +600,6 @@
       margin-bottom: 56px;
     }
     .footer-col h4 {
-      color: var(--on-dark);
       font-size: 11px;
       font-weight: 600;
       letter-spacing: 2px;
@@ -559,7 +617,7 @@
     }
     .footer-col a:hover { color: var(--on-dark); }
     .footer-bottom {
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
       padding-top: 28px;
       font-size: 13px;
       color: var(--muted);
@@ -571,25 +629,31 @@
       left: 24px;
       bottom: 24px;
       z-index: 20;
-      background: linear-gradient(135deg, #1a1714, #0e0d0b);
-      color: var(--on-dark);
+      background: linear-gradient(145deg, #fffcf7, #f7f0e2);
+      color: var(--ink);
       border-radius: var(--r-lg);
       padding: 16px 20px;
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 4px 20px rgba(200, 132, 45, 0.15), 0 1px 4px rgba(0, 0, 0, 0.06);
       font-family: var(--sans);
-      border: 1px solid rgba(232, 165, 90, 0.15);
+      border: 1px solid var(--hairline);
+      animation: dcardPulse 3s ease-in-out infinite;
+    }
+    @keyframes dcardPulse {
+      0%, 100% { box-shadow: 0 4px 20px rgba(200, 132, 45, 0.15); }
+      50% { box-shadow: 0 4px 28px rgba(200, 132, 45, 0.25); }
     }
     .d-card .d-label {
       font-size: 10px;
       letter-spacing: 2px;
       text-transform: uppercase;
       color: var(--gold);
+      font-weight: 600;
     }
     .d-card .d-num {
       font-family: var(--serif);
       font-size: 24px;
       font-weight: 600;
-      color: var(--on-dark);
+      color: var(--ink);
       line-height: 1.1;
       margin-top: 4px;
     }
@@ -601,31 +665,32 @@
       border-radius: var(--r-lg);
       padding: var(--sp-4) var(--sp-5);
       border: 1px solid var(--hairline-soft);
+      transition: border-color 0.2s;
     }
-    .gb-item .gb-name { font-weight: 600; font-size: 15px; color: var(--on-dark); }
+    .gb-item:hover { border-color: var(--hairline); }
+    .gb-item .gb-name { font-weight: 600; font-size: 15px; color: var(--ink); }
     .gb-item .gb-msg { font-size: 14px; color: var(--body); margin-top: var(--sp-1); white-space: pre-wrap; }
-    .gb-item .gb-time { font-size: 12px; color: var(--muted); margin-top: var(--sp-2); letter-spacing: 0.5px; }
+    .gb-item .gb-time { font-size: 12px; color: var(--muted-soft); margin-top: var(--sp-2); letter-spacing: 0.5px; }
     .gb-status { font-size: 13px; color: var(--muted); min-height: 18px; margin-bottom: var(--sp-1); }
     .gb-actions { display: flex; gap: var(--sp-2); margin-top: var(--sp-3); }
     .gb-actions button {
       font-family: var(--sans); font-size: 12px; font-weight: 500;
       padding: var(--sp-2) var(--sp-3); border-radius: var(--r-md); cursor: pointer;
-      border: 1px solid var(--hairline); background: transparent; color: var(--on-dark-soft);
+      border: 1px solid var(--hairline); background: var(--canvas); color: var(--ink-soft);
       transition: all 0.2s;
     }
-    .gb-actions button:hover { border-color: rgba(255,255,255,0.2); color: var(--on-dark); }
-    .gb-actions button:active { background: rgba(255,255,255,0.05); }
+    .gb-actions button:hover { border-color: var(--gold-soft); color: var(--ink); }
+    .gb-actions button:active { background: var(--surface-soft); }
     .gb-actions button.gb-del { color: var(--error); }
     .gb-edit-form { display: grid; gap: var(--sp-2); }
     .gb-edit-form input, .gb-edit-form textarea {
       width: 100%; font-family: var(--sans); font-size: 14px;
-      background: var(--canvas); color: var(--on-dark); border: 1px solid var(--hairline);
+      background: var(--canvas); color: var(--ink); border: 1px solid var(--hairline);
       border-radius: var(--r-md); padding: var(--sp-2) var(--sp-3);
     }
     .gb-edit-form textarea { min-height: 60px; resize: vertical; }
     .gb-edit-form .gb-edit-actions { display: flex; gap: var(--sp-2); }
 
-    /* Inline guestbook section */
     .gb-grid {
       display: grid;
       grid-template-columns: 360px 1fr;
@@ -646,7 +711,7 @@
       font-family: var(--serif);
       font-weight: 600;
       font-size: 22px;
-      color: var(--on-dark);
+      color: var(--ink);
       letter-spacing: -0.01em;
       margin-bottom: 4px;
     }
@@ -656,16 +721,17 @@
       font-family: var(--sans);
       font-size: 14px;
       background: var(--canvas);
-      color: var(--on-dark);
+      color: var(--ink);
       border: 1px solid var(--hairline);
       border-radius: var(--r-md);
       padding: var(--sp-3) var(--sp-4);
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
     .gb-form-card input:focus,
     .gb-form-card textarea:focus {
       outline: none;
       border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(212, 148, 74, 0.12);
     }
     .gb-form-card textarea { min-height: 96px; resize: vertical; }
     .gb-form-card .btn { justify-self: start; }
@@ -702,11 +768,11 @@
         top: 64px; left: 0; right: 0;
         flex-direction: column;
         gap: 0;
-        background: rgba(14, 13, 11, 0.95);
-        backdrop-filter: blur(16px);
+        background: rgba(250, 246, 239, 0.96);
+        backdrop-filter: blur(14px);
         border-bottom: 1px solid var(--hairline-soft);
         padding: var(--sp-2) var(--sp-5);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
         display: none;
       }
       .menu.open { display: flex; }
@@ -746,10 +812,14 @@
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
       }
+      .reveal { opacity: 1; transform: none; }
     }
   </style>
 </head>
 <body>
+
+  <!-- Ambient light particles canvas -->
+  <canvas id="ambientCanvas" aria-hidden="true"></canvas>
 
   <!-- Top nav -->
   <header class="top-nav">
@@ -777,16 +847,16 @@
   <section class="hero">
     <div class="hero-inner">
       <div>
-        <span class="eyebrow">Autumn Light Festival · 2026</span>
-        <h1>가을 빛 축제</h1>
-        <p class="lead">도시 전체가 물드는 가을, 음악과 빛과 먹거리가 어우러지는 5일간의 특별한 잔치에 여러분을 초대합니다.</p>
-        <div class="date">2026.10.08 — 10.12 · 한강시민공원 일대</div>
-        <div class="hero-actions">
+        <span class="eyebrow reveal">Autumn Light Festival · 2026</span>
+        <h1 class="reveal reveal-delay-1">가을 <span class="light-word">빛</span> 축제</h1>
+        <p class="lead reveal reveal-delay-2">도시 전체가 물드는 가을, 음악과 빛과 먹거리가 어우러지는 5일간의 특별한 잔치에 여러분을 초대합니다.</p>
+        <div class="date reveal reveal-delay-2">2026.10.08 — 10.12 · 한강시민공원 일대</div>
+        <div class="hero-actions reveal reveal-delay-3">
           <a class="btn btn-primary" href="#">티켓 예매하기</a>
           <a class="btn btn-secondary" href="#">라인업 보기</a>
         </div>
       </div>
-      <aside class="hero-card" aria-label="축제 패스 정보">
+      <aside class="hero-card reveal reveal-delay-2" aria-label="축제 패스 정보">
         <span class="badge-coral">10/08 OPEN</span>
         <div class="pass-label">Festival Pass</div>
         <div class="pass-date">10.08 — 10.12</div>
@@ -800,54 +870,54 @@
   </section>
 
   <!-- Feature cards -->
-  <section class="section">
+  <section class="section section-alt">
     <div class="section-inner">
       <div class="section-head">
-        <span class="eyebrow">Highlights</span>
-        <h2>축제 하이라이트</h2>
-        <p>놓칠 수 없는 이번 축제의 핵심 프로그램</p>
+        <span class="eyebrow reveal">Highlights</span>
+        <h2 class="reveal reveal-delay-1">축제 하이라이트</h2>
+        <p class="reveal reveal-delay-2">놓칠 수 없는 이번 축제의 핵심 프로그램</p>
       </div>
       <div class="cards">
-        <article class="feature-card">
+        <article class="feature-card reveal reveal-delay-1">
           <svg class="mark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c.5 6 5.5 11 12 12-6.5 1-11.5 6-12 12-.5-6-5.5-11-12-12C6.5 11 11.5 6 12 0z"/></svg>
           <div class="tag">메인 무대</div>
           <h3>라이트 콘서트</h3>
           <p>해 질 녘부터 시작되는 대형 라이트 쇼와 인디 밴드 라인업이 펼쳐지는 축제의 하이라이트 무대입니다.</p>
           <div class="card-foot">
-            <a class="text-link" href="#">자세히 보기 →</a>
+            <a class="text-link" href="#">자세히 보기 <span aria-hidden="true">→</span></a>
             <span class="click-count" data-clicks="0">조회수 0</span>
           </div>
         </article>
 
-        <article class="feature-card">
+        <article class="feature-card reveal reveal-delay-2">
           <svg class="mark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c.5 6 5.5 11 12 12-6.5 1-11.5 6-12 12-.5-6-5.5-11-12-12C6.5 11 11.5 6 12 0z"/></svg>
           <div class="tag">푸드 마켓</div>
           <h3>가을 먹거리 거리</h3>
           <p>전국 50개 푸드트럭과 로컬 식당이 한자리에. 가을 제철 재료로 만든 특별 메뉴를 맛보세요.</p>
           <div class="card-foot">
-            <a class="text-link" href="#">자세히 보기 →</a>
+            <a class="text-link" href="#">자세히 보기 <span aria-hidden="true">→</span></a>
             <span class="click-count" data-clicks="0">조회수 0</span>
           </div>
         </article>
 
-        <article class="feature-card">
+        <article class="feature-card reveal reveal-delay-3">
           <svg class="mark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c.5 6 5.5 11 12 12-6.5 1-11.5 6-12 12-.5-6-5.5-11-12-12C6.5 11 11.5 6 12 0z"/></svg>
           <div class="tag">체험 워크숍</div>
           <h3>빛으로 그리는 공방</h3>
           <p>랜턴 만들기, 네온 사인 체험 등 온 가족이 함께 즐길 수 있는 손만들기 프로그램이 매일 열립니다.</p>
           <div class="card-foot">
-            <a class="text-link" href="#">자세히 보기 →</a>
+            <a class="text-link" href="#">자세히 보기 <span aria-hidden="true">→</span></a>
             <span class="click-count" data-clicks="0">조회수 0</span>
           </div>
         </article>
 
-        <article class="feature-card">
+        <article class="feature-card reveal reveal-delay-4">
           <svg class="mark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c.5 6 5.5 11 12 12-6.5 1-11.5 6-12 12-.5-6-5.5-11-12-12C6.5 11 11.5 6 12 0z"/></svg>
           <div class="tag">야간 퍼레이드</div>
           <h3>빛의 행렬</h3>
           <p>조명으로 장식한 퍼레이드가 축제 거리를 누비며, 등불과 퍼포먼스가 하나 되는 화려한 야간 행사입니다.</p>
           <div class="card-foot">
-            <a class="text-link" href="#">자세히 보기 →</a>
+            <a class="text-link" href="#">자세히 보기 <span aria-hidden="true">→</span></a>
             <span class="click-count" data-clicks="0">조회수 0</span>
           </div>
         </article>
@@ -857,7 +927,7 @@
 
   <!-- CTA band -->
   <div class="cta-wrap">
-    <div class="cta-inner">
+    <div class="cta-inner reveal">
       <h2>지금, 가을빛 축제를 예매하세요</h2>
       <p>1일권부터 5일 패스까지. 가을을 빛으로 채울 자리를 지금 확보하세요.</p>
       <a class="btn btn-primary" href="#">티켓 예매하기</a>
@@ -868,12 +938,12 @@
   <section class="section gb-section" id="guestbook">
     <div class="section-inner">
       <div class="section-head">
-        <span class="eyebrow">Guestbook</span>
-        <h2>방명록</h2>
-        <p>축제에 남기고 싶은 한마디를 자유롭게 적어주세요</p>
+        <span class="eyebrow reveal">Guestbook</span>
+        <h2 class="reveal reveal-delay-1">방명록</h2>
+        <p class="reveal reveal-delay-2">축제에 남기고 싶은 한마디를 자유롭게 적어주세요</p>
       </div>
       <div class="gb-grid">
-        <form class="gb-form-card" id="gbForm">
+        <form class="gb-form-card reveal" id="gbForm">
           <div class="gb-form-title">글 남기기</div>
           <input type="text" id="gbName" placeholder="이름" maxlength="50" required>
           <textarea id="gbMsg" placeholder="메시지를 남겨주세요" maxlength="1000" required></textarea>
@@ -932,7 +1002,87 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
   <script>
+    /* ─── Ambient light particles ─── */
+    (function () {
+      const canvas = document.getElementById("ambientCanvas");
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      let w, h;
+      const particles = [];
+      const COUNT = 18;
+      const colors = [
+        "rgba(232, 165, 90, 0.35)",
+        "rgba(212, 148, 74, 0.3)",
+        "rgba(240, 201, 138, 0.25)",
+        "rgba(194, 122, 40, 0.2)",
+      ];
+
+      function resize() {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+      }
+      window.addEventListener("resize", resize);
+      resize();
+
+      for (let i = 0; i < COUNT; i++) {
+        particles.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          r: 2 + Math.random() * 4,
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: -0.15 - Math.random() * 0.25,
+          color: colors[i % colors.length],
+          phase: Math.random() * Math.PI * 2,
+        });
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, w, h);
+        const t = Date.now() * 0.001;
+        particles.forEach((p) => {
+          p.x += p.vx + Math.sin(t + p.phase) * 0.15;
+          p.y += p.vy;
+          if (p.y < -10) { p.y = h + 10; p.x = Math.random() * w; }
+          if (p.x < -10) p.x = w + 10;
+          if (p.x > w + 10) p.x = -10;
+          const pulse = 0.6 + Math.sin(t * 0.8 + p.phase) * 0.4;
+          ctx.globalAlpha = pulse;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.fill();
+        });
+        ctx.globalAlpha = 1;
+        requestAnimationFrame(draw);
+      }
+      draw();
+    })();
+  </script>
+
+  <script>
+    /* ─── Scroll reveal ─── */
+    (function () {
+      const els = document.querySelectorAll(".reveal");
+      if (!els.length) return;
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              e.target.classList.add("visible");
+              io.unobserve(e.target);
+            }
+          });
+        },
+        { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+      );
+      els.forEach((el) => io.observe(el));
+    })();
+  </script>
+
+  <script>
+    /* ─── Nav toggle ─── */
     (function () {
       var t = document.getElementById("navToggle");
       var m = document.querySelector(".menu");
@@ -949,7 +1099,9 @@
       });
     })();
   </script>
+
   <script>
+    /* ─── Supabase click counts ─── */
     (function () {
       const SUPA_URL = "https://iklbohccsveijkdmoiec.supabase.co";
       const SUPA_KEY = "sb_publishable_4aXpwlqhVMmRNJpyOYNa2Q_WT6rcoBh";
@@ -1001,7 +1153,9 @@
       loadClickCounts();
     })();
   </script>
+
   <script>
+    /* ─── Guestbook ─── */
     (function () {
       const API = "https://autumn-light-festival-api.onrender.com";
       const openBtn = document.getElementById("gbOpen");
@@ -1115,7 +1269,7 @@
       function fireworks(x, y) {
         const layer = document.getElementById("fxLayer");
         if (!layer || !window.gsap) return;
-        const colors = ["#e8a55a", "#d4944a", "#d4a017", "#f0c98a", "#faf9f5"];
+        const colors = ["#d4944a", "#e8a55a", "#f0c98a", "#c27a28", "#faf6ef"];
         const burst = (ox, oy, n, delay) => {
           for (let i = 0; i < n; i++) {
             const p = document.createElement("div");
