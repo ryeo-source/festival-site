@@ -478,6 +478,22 @@
     .gb-item .gb-msg { font-size: 14px; color: var(--body); margin-top: 4px; white-space: pre-wrap; }
     .gb-item .gb-time { font-size: 12px; color: var(--muted-soft); margin-top: 6px; letter-spacing: 0.5px; }
     .gb-status { font-size: 13px; color: var(--muted); min-height: 18px; margin-bottom: 4px; }
+    .gb-actions { display: flex; gap: 8px; margin-top: 10px; }
+    .gb-actions button {
+      font-family: var(--sans); font-size: 12px; font-weight: 500;
+      padding: 5px 12px; border-radius: var(--r-md); cursor: pointer;
+      border: 1px solid var(--hairline); background: var(--canvas); color: var(--ink);
+    }
+    .gb-actions button:active { background: var(--surface-soft); }
+    .gb-actions button.gb-del { color: var(--error, #c64545); border-color: rgba(198,69,69,0.3); }
+    .gb-edit-form { display: grid; gap: 8px; }
+    .gb-edit-form input, .gb-edit-form textarea {
+      width: 100%; font-family: var(--sans); font-size: 14px;
+      background: #fff; color: var(--ink); border: 1px solid var(--hairline);
+      border-radius: var(--r-md); padding: 8px 12px;
+    }
+    .gb-edit-form textarea { min-height: 60px; resize: vertical; }
+    .gb-edit-form .gb-edit-actions { display: flex; gap: 8px; }
 
     /* Responsive */
     @media (max-width: 900px) {
@@ -752,14 +768,75 @@
           data.forEach((g) => {
             const item = document.createElement("div");
             item.className = "gb-item";
+            item.dataset.id = g.id;
             const n = document.createElement("div"); n.className = "gb-name"; n.textContent = g.author_name;
             const m = document.createElement("div"); m.className = "gb-msg"; m.textContent = g.message;
             const t = document.createElement("div"); t.className = "gb-time"; t.textContent = fmtTime(g.created_at);
-            item.append(n, m, t);
+            const actions = document.createElement("div"); actions.className = "gb-actions";
+            const editBtn = document.createElement("button"); editBtn.type = "button"; editBtn.textContent = "수정";
+            editBtn.addEventListener("click", () => startEdit(item, g));
+            const delBtn = document.createElement("button"); delBtn.type = "button"; delBtn.className = "gb-del"; delBtn.textContent = "삭제";
+            delBtn.addEventListener("click", () => delEntry(g.id));
+            actions.append(editBtn, delBtn);
+            item.append(n, m, t, actions);
             list.appendChild(item);
           });
         } catch (e) {
           status.textContent = "불러오기 실패: " + e.message;
+        }
+      }
+
+      function startEdit(item, g) {
+        item.innerHTML = "";
+        const form = document.createElement("div"); form.className = "gb-edit-form";
+        const nameInput = document.createElement("input"); nameInput.type = "text"; nameInput.value = g.author_name; nameInput.maxLength = 50;
+        const msgInput = document.createElement("textarea"); msgInput.value = g.message; msgInput.maxLength = 1000;
+        const acts = document.createElement("div"); acts.className = "gb-edit-actions";
+        const save = document.createElement("button"); save.type = "button"; save.className = "btn btn-primary"; save.textContent = "저장";
+        const cancel = document.createElement("button"); cancel.type = "button"; cancel.textContent = "취소";
+        save.addEventListener("click", async () => {
+          const author_name = nameInput.value.trim();
+          const message = msgInput.value.trim();
+          if (!author_name || !message) return;
+          save.disabled = true; save.textContent = "저장 중...";
+          try {
+            const res = await fetch(API + "/api/guestbook/" + g.id, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ author_name, message })
+            });
+            if (!res.ok) {
+              const err = await res.json().catch(() => ({}));
+              status.textContent = "수정 실패: " + (err.error || res.status);
+              save.disabled = false; save.textContent = "저장";
+              return;
+            }
+            loadGuestbook();
+          } catch (e) {
+            status.textContent = "수정 실패: " + e.message;
+            save.disabled = false; save.textContent = "저장";
+          }
+        });
+        cancel.addEventListener("click", () => loadGuestbook());
+        acts.append(save, cancel);
+        form.append(nameInput, msgInput, acts);
+        item.append(form);
+        nameInput.focus();
+      }
+
+      async function delEntry(id) {
+        if (!confirm("이 방명록 글을 삭제할까요?")) return;
+        status.textContent = "삭제 중...";
+        try {
+          const res = await fetch(API + "/api/guestbook/" + id, { method: "DELETE" });
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            status.textContent = "삭제 실패: " + (err.error || res.status);
+            return;
+          }
+          loadGuestbook();
+        } catch (e) {
+          status.textContent = "삭제 실패: " + e.message;
         }
       }
 
