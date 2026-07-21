@@ -495,6 +495,46 @@
     .gb-edit-form textarea { min-height: 60px; resize: vertical; }
     .gb-edit-form .gb-edit-actions { display: flex; gap: 8px; }
 
+    /* Inline guestbook section */
+    .gb-grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 32px;
+      align-items: start;
+    }
+    .gb-form-card {
+      background: var(--surface-card);
+      border-radius: var(--r-lg);
+      padding: 28px;
+      display: grid;
+      gap: 12px;
+      position: sticky;
+      top: 88px;
+    }
+    .gb-form-title {
+      font-family: var(--serif);
+      font-weight: 600;
+      font-size: 20px;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+      margin-bottom: 4px;
+    }
+    .gb-form-card input,
+    .gb-form-card textarea {
+      width: 100%;
+      font-family: var(--sans);
+      font-size: 14px;
+      background: #fff;
+      color: var(--ink);
+      border: 1px solid var(--hairline);
+      border-radius: var(--r-md);
+      padding: 10px 14px;
+    }
+    .gb-form-card textarea { min-height: 96px; resize: vertical; }
+    .gb-form-card .btn { justify-self: start; }
+    .gb-section .gb-list { gap: 14px; }
+    .gb-section .gb-status { margin: 0; }
+
     /* Responsive */
     @media (max-width: 900px) {
       .hero { padding: 64px 24px; }
@@ -507,6 +547,8 @@
       .cta-inner h2 { font-size: 28px; }
       .menu { display: none; }
       .footer-cols { grid-template-columns: 1fr 1fr; }
+      .gb-grid { grid-template-columns: 1fr; }
+      .gb-form-card { position: static; top: auto; }
     }
     @media (max-width: 520px) {
       .footer-cols { grid-template-columns: 1fr; }
@@ -624,6 +666,27 @@
     </div>
   </div>
 
+  <!-- Guestbook -->
+  <section class="section gb-section" id="guestbook">
+    <div class="section-inner">
+      <div class="section-head">
+        <span class="eyebrow">Guestbook</span>
+        <h2>방명록</h2>
+        <p>축제에 남기고 싶은 한마디를 자유롭게 적어주세요</p>
+      </div>
+      <div class="gb-grid">
+        <form class="gb-form-card" id="gbForm">
+          <div class="gb-form-title">글 남기기</div>
+          <input type="text" id="gbName" placeholder="이름" maxlength="50" required>
+          <textarea id="gbMsg" placeholder="메시지를 남겨주세요" maxlength="1000" required></textarea>
+          <button class="btn btn-primary" type="submit">남기기</button>
+          <div class="gb-status" id="gbStatus"></div>
+        </form>
+        <div class="gb-list" id="gbList"></div>
+      </div>
+    </div>
+  </section>
+
   <!-- Footer -->
   <footer>
     <div class="footer-inner">
@@ -664,23 +727,6 @@
   <div class="d-card" title="축제까지 3일 남았습니다">
     <div class="d-label">D-DAY</div>
     <div class="d-num">D-3</div>
-  </div>
-
-  <!-- Guestbook modal -->
-  <div class="gb-overlay" id="gbOverlay" aria-hidden="true">
-    <div class="gb-modal" role="dialog" aria-modal="true" aria-label="방명록">
-      <div class="gb-head">
-        <h3>방명록</h3>
-        <button class="gb-close" id="gbClose" aria-label="닫기">&times;</button>
-      </div>
-      <form class="gb-form" id="gbForm">
-        <input type="text" id="gbName" placeholder="이름" maxlength="50" required>
-        <textarea id="gbMsg" placeholder="메시지를 남겨주세요" maxlength="1000" required></textarea>
-        <button class="btn btn-primary" type="submit">남기기</button>
-      </form>
-      <div class="gb-status" id="gbStatus"></div>
-      <div class="gb-list" id="gbList"></div>
-    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -739,9 +785,7 @@
   <script>
     (function () {
       const API = "https://autumn-light-festival-api.onrender.com";
-      const overlay = document.getElementById("gbOverlay");
       const openBtn = document.getElementById("gbOpen");
-      const closeBtn = document.getElementById("gbClose");
       const list = document.getElementById("gbList");
       const status = document.getElementById("gbStatus");
       const form = document.getElementById("gbForm");
@@ -840,20 +884,14 @@
         }
       }
 
-      function openModal() {
-        overlay.classList.add("open");
-        overlay.setAttribute("aria-hidden", "false");
-        loadGuestbook();
+      if (openBtn) {
+        openBtn.addEventListener("click", function (e) {
+          e.preventDefault();
+          const sec = document.getElementById("guestbook");
+          if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
+          setTimeout(() => { if (nameEl) nameEl.focus(); }, 600);
+        });
       }
-      function closeModal() {
-        overlay.classList.remove("open");
-        overlay.setAttribute("aria-hidden", "true");
-      }
-
-      openBtn.addEventListener("click", function (e) { e.preventDefault(); openModal(); });
-      closeBtn.addEventListener("click", closeModal);
-      overlay.addEventListener("click", function (e) { if (e.target === overlay) closeModal(); });
-      document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeModal(); });
 
       form.addEventListener("submit", async function (e) {
         e.preventDefault();
@@ -879,6 +917,8 @@
           status.textContent = "전송 실패: " + e.message;
         }
       });
+
+      loadGuestbook();
     })();
   </script>
 </body>
