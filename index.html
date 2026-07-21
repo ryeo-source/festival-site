@@ -535,6 +535,17 @@
     .gb-section .gb-list { gap: 14px; }
     .gb-section .gb-status { margin: 0; }
 
+    /* Fireworks */
+    #fxLayer { position: fixed; inset: 0; pointer-events: none; z-index: 60; overflow: hidden; }
+    .fx-particle {
+      position: absolute;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      will-change: transform, opacity;
+      box-shadow: 0 0 6px currentColor;
+    }
+
     /* Responsive */
     @media (max-width: 900px) {
       .hero { padding: 64px 24px; }
@@ -729,7 +740,11 @@
     <div class="d-num">D-3</div>
   </div>
 
+  <!-- fireworks layer -->
+  <div id="fxLayer" aria-hidden="true"></div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script>
     (function () {
       const SUPA_URL = "https://iklbohccsveijkdmoiec.supabase.co";
@@ -893,6 +908,42 @@
         });
       }
 
+      function fireworks(x, y) {
+        const layer = document.getElementById("fxLayer");
+        if (!layer || !window.gsap) return;
+        const colors = ["#f4b740", "#cc785c", "#c8392b", "#faf9f5", "#5db8a6"];
+        const burst = (ox, oy, n, delay) => {
+          for (let i = 0; i < n; i++) {
+            const p = document.createElement("div");
+            p.className = "fx-particle";
+            p.style.left = ox + "px";
+            p.style.top = oy + "px";
+            const c = colors[i % colors.length];
+            p.style.background = c;
+            p.style.color = c;
+            layer.appendChild(p);
+            const angle = (Math.PI * 2 * i) / n + Math.random() * 0.4;
+            const dist = 70 + Math.random() * 130;
+            gsap.fromTo(p,
+              { x: 0, y: 0, opacity: 1, scale: 1 },
+              {
+                x: Math.cos(angle) * dist,
+                y: Math.sin(angle) * dist + 70,
+                opacity: 0,
+                scale: 0.2,
+                duration: 0.9 + Math.random() * 0.5,
+                ease: "power2.out",
+                delay: delay,
+                onComplete: () => p.remove()
+              }
+            );
+          }
+        };
+        burst(x, y, 34, 0);
+        burst(x - 40, y - 20, 22, 0.12);
+        burst(x + 40, y - 10, 22, 0.22);
+      }
+
       form.addEventListener("submit", async function (e) {
         e.preventDefault();
         const author_name = nameEl.value.trim();
@@ -912,6 +963,11 @@
           }
           msgEl.value = "";
           status.textContent = "등록되었습니다!";
+          const btn = form.querySelector('button[type=submit]');
+          if (btn) {
+            const r = btn.getBoundingClientRect();
+            fireworks(r.left + r.width / 2, r.top + r.height / 2);
+          }
           loadGuestbook();
         } catch (e) {
           status.textContent = "전송 실패: " + e.message;
