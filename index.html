@@ -31,6 +31,12 @@
       --on-dark: #faf9f5;
       --on-dark-soft: #a09d96;
       --accent-amber: #e8a55a;
+      --error: #c64545;
+      --success: #5db872;
+      --warning: #d4a017;
+
+      --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+      --sp-5: 24px; --sp-6: 32px; --sp-7: 48px; --sp-8: 64px; --sp-9: 96px;
 
       --r-md: 8px;
       --r-lg: 12px;
@@ -443,71 +449,43 @@
       margin-top: 2px;
     }
 
-    /* Guestbook modal */
-    .gb-overlay {
-      position: fixed; inset: 0; z-index: 50;
-      background: rgba(20, 20, 19, 0.55);
-      display: none;
-      align-items: center; justify-content: center;
-      padding: 24px;
-    }
-    .gb-overlay.open { display: flex; }
-    .gb-modal {
-      background: var(--canvas);
-      color: var(--ink);
-      border-radius: var(--r-xl);
-      width: 100%; max-width: 560px;
-      max-height: 85vh; overflow: auto;
-      padding: 32px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    }
-    .gb-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-    .gb-head h3 { font-family: var(--serif); font-weight: 600; font-size: 28px; letter-spacing: -0.01em; }
-    .gb-close { background: none; border: none; font-size: 26px; line-height: 1; color: var(--muted); cursor: pointer; }
-    .gb-close:active { color: var(--ink); }
-    .gb-form { display: grid; gap: 10px; margin-bottom: 22px; }
-    .gb-form input, .gb-form textarea {
-      width: 100%; font-family: var(--sans); font-size: 14px;
-      background: #fff; color: var(--ink); border: 1px solid var(--hairline);
-      border-radius: var(--r-md); padding: 10px 14px;
-    }
-    .gb-form textarea { min-height: 72px; resize: vertical; }
-    .gb-list { display: grid; gap: 12px; }
-    .gb-item { background: var(--surface-card); border-radius: var(--r-lg); padding: 16px 18px; }
+    /* Guestbook */
+    .gb-list { display: grid; gap: var(--sp-4); }
+    .gb-item { background: var(--surface-card); border-radius: var(--r-lg); padding: var(--sp-4) var(--sp-5); }
     .gb-item .gb-name { font-weight: 600; font-size: 15px; color: var(--ink); }
-    .gb-item .gb-msg { font-size: 14px; color: var(--body); margin-top: 4px; white-space: pre-wrap; }
-    .gb-item .gb-time { font-size: 12px; color: var(--muted-soft); margin-top: 6px; letter-spacing: 0.5px; }
-    .gb-status { font-size: 13px; color: var(--muted); min-height: 18px; margin-bottom: 4px; }
-    .gb-actions { display: flex; gap: 8px; margin-top: 10px; }
+    .gb-item .gb-msg { font-size: 14px; color: var(--body); margin-top: var(--sp-1); white-space: pre-wrap; }
+    .gb-item .gb-time { font-size: 12px; color: var(--muted-soft); margin-top: var(--sp-1); letter-spacing: 0.5px; }
+    .gb-status { font-size: 13px; color: var(--muted); min-height: 18px; margin-bottom: var(--sp-1); }
+    .gb-actions { display: flex; gap: var(--sp-2); margin-top: var(--sp-3); }
     .gb-actions button {
       font-family: var(--sans); font-size: 12px; font-weight: 500;
-      padding: 5px 12px; border-radius: var(--r-md); cursor: pointer;
+      padding: var(--sp-2) var(--sp-3); border-radius: var(--r-md); cursor: pointer;
       border: 1px solid var(--hairline); background: var(--canvas); color: var(--ink);
     }
     .gb-actions button:active { background: var(--surface-soft); }
-    .gb-actions button.gb-del { color: var(--error, #c64545); border-color: rgba(198,69,69,0.3); }
-    .gb-edit-form { display: grid; gap: 8px; }
+    .gb-actions button.gb-del { color: var(--error); }
+    .gb-edit-form { display: grid; gap: var(--sp-2); }
     .gb-edit-form input, .gb-edit-form textarea {
       width: 100%; font-family: var(--sans); font-size: 14px;
-      background: #fff; color: var(--ink); border: 1px solid var(--hairline);
-      border-radius: var(--r-md); padding: 8px 12px;
+      background: var(--canvas); color: var(--ink); border: 1px solid var(--hairline);
+      border-radius: var(--r-md); padding: var(--sp-2) var(--sp-3);
     }
     .gb-edit-form textarea { min-height: 60px; resize: vertical; }
-    .gb-edit-form .gb-edit-actions { display: flex; gap: 8px; }
+    .gb-edit-form .gb-edit-actions { display: flex; gap: var(--sp-2); }
 
     /* Inline guestbook section */
     .gb-grid {
       display: grid;
       grid-template-columns: 360px 1fr;
-      gap: 32px;
+      gap: var(--sp-6);
       align-items: start;
     }
     .gb-form-card {
       background: var(--surface-card);
       border-radius: var(--r-lg);
-      padding: 28px;
+      padding: var(--sp-6);
       display: grid;
-      gap: 12px;
+      gap: var(--sp-3);
       position: sticky;
       top: 88px;
     }
@@ -524,15 +502,14 @@
       width: 100%;
       font-family: var(--sans);
       font-size: 14px;
-      background: #fff;
+      background: var(--canvas);
       color: var(--ink);
       border: 1px solid var(--hairline);
       border-radius: var(--r-md);
-      padding: 10px 14px;
+      padding: var(--sp-2) var(--sp-3);
     }
     .gb-form-card textarea { min-height: 96px; resize: vertical; }
     .gb-form-card .btn { justify-self: start; }
-    .gb-section .gb-list { gap: 14px; }
     .gb-section .gb-status { margin: 0; }
 
     /* Fireworks */
@@ -911,7 +888,7 @@
       function fireworks(x, y) {
         const layer = document.getElementById("fxLayer");
         if (!layer || !window.gsap) return;
-        const colors = ["#f4b740", "#cc785c", "#c8392b", "#faf9f5", "#5db8a6"];
+        const colors = ["#cc785c", "#a9583e", "#e8a55a", "#d4a017", "#faf9f5"];
         const burst = (ox, oy, n, delay) => {
           for (let i = 0; i < n; i++) {
             const p = document.createElement("div");
